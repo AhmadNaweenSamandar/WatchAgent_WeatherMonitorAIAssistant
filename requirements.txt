@@ -3,4 +3,5 @@ uvicorn
 aiosqlite
 httpx
 pydantic
+pydantic-settings
 pytest
