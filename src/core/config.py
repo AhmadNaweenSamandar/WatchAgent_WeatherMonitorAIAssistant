@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     APP_ENV: str = "development"
     LOG_LEVEL: str = "INFO"
+    DATABASE_URL: str = "data/weather.db"
     OPEN_METEO_BASE_URL: str = "https://api.open-meteo.com/v1/forecast"
 
     # Automatically load from a local .env file if it exists
