@@ -1,7 +1,6 @@
 import pytest
 from src.db.queries import save_reading, get_events
-# since we decided to use Test-Driven Development, we will create this engine in Phase 6.
-# from src.events.engine import evaluate_events 
+from src.events.engine import evaluate_events
 
 @pytest.mark.asyncio
 async def test_freezing_rain_pivot_trigger(db_connection):

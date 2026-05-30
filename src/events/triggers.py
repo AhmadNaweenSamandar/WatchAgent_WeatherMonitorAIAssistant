@@ -18,7 +18,7 @@ def check_freezing_rain_pivot(history: List[Dict[str, Any]]) -> Optional[Dict[st
         return {
             "event_type": "FREEZING_RAIN_PIVOT",
             "description": "Temperature crossed the freezing point during active precipitation.",
-            "reasoning": f"Crossed freezing ({prev['temperature_2m']}C -> {curr['temperature_2m']}C) with {curr['precipitation']}mm precip."
+            "reasoning": f"Crossed the freezing point ({prev['temperature_2m']}C -> {curr['temperature_2m']}C) with {curr['precipitation']}mm precip."
         }
     return None
 
@@ -56,6 +56,6 @@ def check_apparent_divergence(history: List[Dict[str, Any]]) -> Optional[Dict[st
         return {
             "event_type": "APPARENT_DIVERGENCE",
             "description": "Extreme difference between actual and apparent temperature.",
-            "reasoning": f"Actual: {curr['temperature_2m']}C, Apparent: {curr['apparent_temperature']}C (Delta: {delta:.1f}C), Wind: {curr['wind_speed_10m']}km/h."
+            "reasoning": f"Extreme difference between actual and apparent temperature: {curr['temperature_2m']}C vs {curr['apparent_temperature']}C (delta {delta:.1f}C), wind {curr['wind_speed_10m']}km/h."
         }
     return None

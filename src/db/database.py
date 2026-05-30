@@ -2,20 +2,25 @@ import os
 import aiosqlite
 from typing import AsyncGenerator
 
-# Resolve database path from environment or default to local storage
-DATABASE_PATH = os.getenv("DATABASE_URL", "data/weather.db")
+def _database_path() -> str:
+    return os.getenv("DATABASE_URL", "data/weather.db")
+
+
+def _ensure_db_directory(path: str) -> None:
+    dir_name = os.path.dirname(path)
+    if dir_name:
+        os.makedirs(dir_name, exist_ok=True)
+
 
 async def get_db_connection() -> AsyncGenerator[aiosqlite.Connection, None]:
     """
     Asynchronous context provider for SQLite database connections.
     Enforces Write-Ahead Logging (WAL) and foreign key constraints per connection.
     """
-    # Ensure data directory exists
-    dir_name = os.path.dirname(DATABASE_PATH)
-    if dir_name:
-        os.makedirs(dir_name, exist_ok=True)
-        
-    async with aiosqlite.connect(DATABASE_PATH) as db:
+    db_path = _database_path()
+    _ensure_db_directory(db_path)
+
+    async with aiosqlite.connect(db_path) as db:
         db.row_factory = aiosqlite.Row
         # Enable WAL mode for concurrent read/write performance
         await db.execute("PRAGMA journal_mode=WAL;")
@@ -28,7 +33,10 @@ async def initialize_database() -> None:
     Executes structural schema creation. Safe to run on every application startup
     due to conditional IF NOT EXISTS declarations.
     """
-    async with aiosqlite.connect(DATABASE_PATH) as db:
+    db_path = _database_path()
+    _ensure_db_directory(db_path)
+
+    async with aiosqlite.connect(db_path) as db:
         # Create readings table with a composite unique constraint for deduplication
         await db.execute("""
             CREATE TABLE IF NOT EXISTS readings (

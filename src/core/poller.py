@@ -2,6 +2,7 @@ import asyncio
 import logging
 from src.core.weather_client import CITIES, fetch_current_weather
 from src.db.queries import save_reading
+from src.events.engine import evaluate_events
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +24,11 @@ async def weather_polling_loop(db_connection):
             
             if reading_data:
                 try:
-                    # Attempt to save. The database enforces UNIQUE(city, timestamp)
                     inserted = await save_reading(db_connection, reading_data)
                     if inserted:
                         logger.info(f"New reading stored for {city} at {reading_data['timestamp']}")
+                        # NEW LINE: Feed the new reading into the event engine
+                        await evaluate_events(db_connection, city)
                     else:
                         logger.debug(f"Duplicate reading ignored for {city} at {reading_data['timestamp']}")
                 except Exception as e:
