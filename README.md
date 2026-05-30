@@ -26,3 +26,10 @@ This codebase integrates direct programmatic instructions and automated quality 
   2. **Defensive Network Isolation:** Following the `.cursor/rules/poller_resiliency.md` contract, the HTTPX client strictly wraps all calls in exception handlers. Timeouts or 500-level upstream errors trigger a localized `WARNING` log but are swallowed by the client, ensuring the master `while True` daemon never crashes.
   3. **Schema Normalization:** The `weather_client.py` isolates third-party data structures, mapping Open-Meteo's `time` field to our internal `timestamp` schema before returning it, keeping the downstream database layer entirely agnostic of the third-party JSON shape.
   4. **Strict Configuration Decoupling:** The third-party API base URL (`OPEN_METEO_BASE_URL`) has been fully extracted out of the application code and bound to environment configurations using Pydantic Settings management. This allows seamless integration targeting mock HTTP engines during localized validation testing without changing source paths. Since the URL is public it is directly added to (.env.example).
+
+
+## 4.5 Application Lifecycle & Resource Management
+* **Implementation Focus:** Centralized startup and graceful teardown.
+* **Core Decisions and Technical Justifications:**
+  1. **FastAPI Lifespan Context:** Replaced legacy startup/shutdown events with the modern `lifespan` async context manager. This ensures the database schema initializes and the background polling safely spins up before the API accepts web traffic.
+  2. **Graceful Task Cancellation:** The background poller is tracked as an explicit `asyncio.Task`. On application shutdown, the system intercepts the signal, cancels the polling task, and safely closes the database connection pool. This prevents unnecessary processes and corrupted SQLite locks during Docker container teardown.
