@@ -45,3 +45,12 @@ This codebase integrates direct programmatic instructions and automated quality 
      * **The Freezing Rain Pivot:** We assert that the system correctly fires an event when the temperature crosses the 0°C threshold while precipitation is actively falling (> 0mm).
      * **The Stagnant Heat Dome:** We assert that the system successfully tracks state over time, only firing when apparent temperature > 32°C AND wind speed < 5km/h for exactly three consecutive readings.
      * **The Apparent Divergence:** We assert that the system identifies hidden human hazards by firing when the delta between actual and apparent temperature exceeds 10°C under high wind conditions somehthing like 45km/hr.
+
+
+
+## 6. Meteorological Event Engine & Strategy Pattern
+* **Implementation Focus:** Executing domain logic with strict memory boundaries and pure function isolation.
+* **Core Decisions and Technical Justifications:**
+  1. **Two-Tier Strategy Architecture (SRP):** We rejected single-file monolithic logic in favor of strict separation of concerns. `src/events/triggers.py` contains strictly pure Python functions evaluating numerical arrays, completely oblivious to the database. `src/events/engine.py` acts as the orchestrator, pulling data and handling storage. This guarantees our business logic can be unit-tested without complex database mocking.
+  2. **O(1) Memory Constraints:** To prevent the application from crashing due to Out-Of-Memory (OOM) errors as the database grows, the engine enforces a strict context window (`LIMIT 3`) when querying historical readings. This guarantees the background polling daemon consumes the exact same microscopic memory footprint on Year 5 as it does on Day 1.
+  3. **Bi-Directional Environmental Safety:** The AI-assisted baseline logic for the Freezing Rain Pivot only checked for temperature drops. We manually overrode this to include rapid thawing spikes (crossing 0°C from below while raining), reflecting a deeper domain awareness of municipal infrastructure hazards.
