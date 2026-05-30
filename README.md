@@ -33,3 +33,15 @@ This codebase integrates direct programmatic instructions and automated quality 
 * **Core Decisions and Technical Justifications:**
   1. **FastAPI Lifespan Context:** Replaced legacy startup/shutdown events with the modern `lifespan` async context manager. This ensures the database schema initializes and the background polling safely spins up before the API accepts web traffic.
   2. **Graceful Task Cancellation:** The background poller is tracked as an explicit `asyncio.Task`. On application shutdown, the system intercepts the signal, cancels the polling task, and safely closes the database connection pool. This prevents unnecessary processes and corrupted SQLite locks during Docker container teardown.
+
+
+
+## 5. Test-Driven Development (TDD) & Quality Assurance
+* **Implementation Focus:** Validation of system constraints and business logic prior to implementation. 
+* **Core Decisions and Technical Justifications:**
+  1. **Strict Mocking (`respx`):** The Open-Meteo API is strictly mocked during the test lifecycle to prevent rate-limiting and ensure tests can run reliably in offline CI/CD pipelines.
+  2. **Deduplication Validation:** The `test_poller.py` suite explicitly validates our Phase 3 SQLite constraints, proving that duplicate API fetches result in zero database mutations.
+  3. **TDD for Domain Logic (The Three Custom Triggers):** As outlined by standard Software Quality Assurance principles, the complex meteorological reasoning engine was constructed using Test-Driven Development. We wrote strictly controlled, failing tests for our three custom events *before* implementing the logic to ensure zero regression:
+     * **The Freezing Rain Pivot:** We assert that the system correctly fires an event when the temperature crosses the 0°C threshold while precipitation is actively falling (> 0mm).
+     * **The Stagnant Heat Dome:** We assert that the system successfully tracks state over time, only firing when apparent temperature > 32°C AND wind speed < 5km/h for exactly three consecutive readings.
+     * **The Apparent Divergence:** We assert that the system identifies hidden human hazards by firing when the delta between actual and apparent temperature exceeds 10°C under high wind conditions somehthing like 45km/hr.
