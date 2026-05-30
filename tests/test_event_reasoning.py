@@ -60,3 +60,26 @@ async def test_stagnant_heat_dome_trigger(db_connection):
     # It should only fire ONCE after the 3rd consecutive reading is processed
     assert len(events) == 1
     assert events[0]["event_type"] == "HEAT_DOME_ALERT"
+
+
+
+@pytest.mark.asyncio
+async def test_apparent_divergence_trigger(db_connection):
+    """
+    TDD Test for Event Trigger 3: Asserts that a delta > 10C between actual and apparent temperature combined with high wind speed
+    like 45km/h triggers an APPARENT_DIVERGENCE event.
+    """
+    # Setup: -5C actual, but severe wind makes it feel like -16C (11 degree delta)
+    reading = {
+        "city": "Vancouver", "timestamp": "2026-02-10T08:00", "temperature_2m": -5.0, 
+        "apparent_temperature": -16.0, "precipitation": 0.0, "wind_speed_10m": 45.0, "weather_code": 3
+    }
+
+    await save_reading(db_connection, reading)
+    await evaluate_events(db_connection, reading["city"])
+
+    events = await get_events(db_connection, city="Vancouver")
+    
+    assert len(events) == 1
+    assert events[0]["event_type"] == "APPARENT_DIVERGENCE"
+    assert "extreme difference" in events[0]["reasoning"].lower()
