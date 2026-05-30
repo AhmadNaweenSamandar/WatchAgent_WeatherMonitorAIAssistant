@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from src.db.database import initialize_database, get_db_connection
 from src.core.poller import weather_polling_loop
+from src.api.routes import router
 
 # Configure root logger
 logging.basicConfig(
@@ -58,6 +59,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+app.include_router(router)
 
 # A temporary health endpoint so the app has at least one route
 @app.get("/health")
