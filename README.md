@@ -1,5 +1,7 @@
 # WatchAgent: Weather Monitor & AI Assistant
 
+Documented by Ahmad Naween Samandar
+
 An autonomous meteorological monitoring system that polls live weather data from Open-Meteo, stores telemetry in SQLite, detects notable environmental events, and exposes everything through a validated HTTP API.
 
 ---
@@ -451,3 +453,5 @@ This codebase integrates direct programmatic instructions and automated quality 
   4. **Docker Stale-Image Diagnosis:** Identified that `docker compose up` without `--build` continues serving previously copied source layers inside the container. Operational fix: run `docker compose up --build` after any API change so the running container reflects the latest routing logic.
   5. **HTTP Status vs JSON Body Separation:** Verified that the `→ 200` requirement refers to the HTTP response status line (visible via `curl -i`), not a field inside the JSON payload. FastAPI automatically emits `200 OK` on successful GET handlers; the JSON body carries only domain data (`status`, `readings`, or `events`).
   6. **Runtime Database Path Resolution:** Ensured `_database_path()` resolves `DATABASE_URL` at call time rather than module import time, and that pytest sets the environment variable before importing database modules. This prevents test runs from accidentally targeting `data/weather.db` and producing `unable to open database file` errors during fixture setup.
+
+
