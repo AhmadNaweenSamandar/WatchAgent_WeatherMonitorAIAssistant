@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   api:
     build: .
@@ -6,5 +8,9 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/app
-    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+      - weather_data:/app/data
+    restart: always
+    
+
+volumes:
+  weather_data:
