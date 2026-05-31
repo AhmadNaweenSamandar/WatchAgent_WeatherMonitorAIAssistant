@@ -30,10 +30,10 @@ jobs:
         pytest -v
 
 
-build:
+  build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-    - name: Test Docker Build
-      run: docker build -t weather-agent-test .
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Test Docker Build
+        run: docker build -t weather-agent-test .
