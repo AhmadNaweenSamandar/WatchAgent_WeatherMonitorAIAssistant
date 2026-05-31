@@ -61,8 +61,3 @@ app = FastAPI(
 )
 
 app.include_router(router)
-
-# A temporary health endpoint so the app has at least one route
-@app.get("/health")
-async def health_check():
-    return {"status": "ok", "message": "API and Background Poller are running."}
