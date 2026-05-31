@@ -28,7 +28,7 @@ This codebase integrates direct programmatic instructions and automated quality 
   4. **Strict Configuration Decoupling:** The third-party API base URL (`OPEN_METEO_BASE_URL`) has been fully extracted out of the application code and bound to environment configurations using Pydantic Settings management. This allows seamless integration targeting mock HTTP engines during localized validation testing without changing source paths. Since the URL is public it is directly added to (.env.example).
 
 
-## 4.5 Application Lifecycle & Resource Management
+## 4 Application Lifecycle & Resource Management
 * **Implementation Focus:** Centralized startup and graceful teardown.
 * **Core Decisions and Technical Justifications:**
   1. **FastAPI Lifespan Context:** Replaced legacy startup/shutdown events with the modern `lifespan` async context manager. This ensures the database schema initializes and the background polling safely spins up before the API accepts web traffic.
@@ -62,3 +62,11 @@ This codebase integrates direct programmatic instructions and automated quality 
   1. **Strict Query Parameter Scoping:** Implemented explicit routing contracts for `GET /health`, `GET /readings`, and `GET /events` using FastAPI dependencies. The endpoints enforce strict filtering constraints (`city` string validation and a hard max capacity `limit=100`) to guarantee client-side performance remains stable.
   2. **FastAPI Contract Inversion (TDD):** Adhering to strict SQA standards, we wrote functional contract validation tests inside `tests/test_api.py` using `httpx.AsyncClient` to force a `404 Red Phase` before activating the routing layer. This protects the frontend from silent data contract drift.
   3. **Cursor Agent Skill Ingestion:** Provisioned an automated threshold-tuning ecosystem (`.cursor/agents/threshold_tuner.md` and `.cursor/skill/replay_historical_data.py`). This allows an AI agent to execute local Python scripts, calculate event frequencies, and propose micro-adjustments to the rule matrix without human intervention.
+
+
+
+## 8. Continuous Integration & Deployment Pipeline (CI/CD)
+* **Implementation Focus:** Automated regression testing and DevOps readiness.
+* **Core Decisions and Technical Justifications:** 
+  1. **GitHub Actions Integration:** Implemented a continuous integration workflow (`.github/workflows/ci.yml`) triggered on `main` branch pushes and Pull Requests.
+  2. **Automated Validation:** The pipeline provisions an Ubuntu runner, restores cached pip dependencies (for optimal execution speed), and runs the full `pytest` suite. This guarantees that no pull request can be merged if it violates our core deduplication or meteorological logic.
